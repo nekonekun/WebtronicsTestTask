@@ -1,5 +1,5 @@
-"""Application builder module"""
-from fastapi import FastAPI, APIRouter
+"""Application builder module."""
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -9,7 +9,7 @@ def build_app(
     redoc_url: str = '/redoc',
     add_cors_middleware: bool = False
 ) -> FastAPI:
-    """Include routers, add CORS middleware and return the app
+    """Include routers, add CORS middleware and return the app.
 
     :param routers: APIRouter instances
     :param swagger_url: Swagger URL

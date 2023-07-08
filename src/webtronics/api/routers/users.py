@@ -1,17 +1,25 @@
 """User-related routes"""
 from typing import Annotated
 
-from fastapi import APIRouter, Query, Depends, HTTPException, status, Response, Header, Cookie
+from fastapi import (
+    APIRouter,
+    Cookie,
+    Depends,
+    Header,
+    HTTPException,
+    Query,
+    Response,
+    status,
+)
 
+from webtronics.api.exceptions import AuthError
 from webtronics.api.schemas.users import (
     User,
-    UserSignUpRequest,
     UserSignInRequest,
     UserSignInResponse,
+    UserSignUpRequest,
 )
-from webtronics.api.stubs import auth_stub, AuthStub, get_current_user_stub
-from webtronics.api.exceptions import AuthError
-
+from webtronics.api.stubs import AuthStub, auth_stub, get_current_user_stub
 
 users_router = APIRouter(
     prefix='/users',
@@ -20,7 +28,9 @@ users_router = APIRouter(
 
 
 @users_router.post('/signup', response_model=User, name='Sign up')
-async def signup(body: UserSignUpRequest, auth: AuthStub = Depends(auth_stub)):
+async def signup(
+    auth: Annotated[AuthStub, Depends(auth_stub)], body: UserSignUpRequest
+):
     """Register new user"""
     try:
         response = await auth.sign_up(
@@ -40,9 +50,9 @@ async def signup(body: UserSignUpRequest, auth: AuthStub = Depends(auth_stub)):
 )
 async def signin(
     res: Response,
+    auth: Annotated[AuthStub, Depends(auth_stub)],
     body: UserSignInRequest,
     set_cookie: Annotated[bool, Query()] = False,
-    auth: AuthStub = Depends(auth_stub),
 ):
     """Check credentials and generate JWT token. Optionally set 'access' cookie."""
     try:
@@ -57,8 +67,10 @@ async def signin(
 
 
 @users_router.get('/me', response_model=User)
-async def get_me(current_user: Annotated[User, Depends(get_current_user_stub)],
-                 auth_header: Annotated[str, Header(alias='Authentication')] = None,
-                 auth_cookie: Annotated[str, Cookie(alias='access')] = None):
+async def get_me(
+    current_user: Annotated[User, Depends(get_current_user_stub)],
+    auth_header: Annotated[str | None, Header(alias='Authentication')] = None,
+    auth_cookie: Annotated[str | None, Cookie(alias='access')] = None,
+):
     """Get currently logged-in user"""
     return current_user

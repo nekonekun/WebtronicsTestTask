@@ -1,22 +1,21 @@
 """Main API script"""
 from typing import Annotated
 
-from passlib.context import CryptContext
-from sqlalchemy.ext.asyncio import (
-    create_async_engine,
-    async_sessionmaker,
-    AsyncSession,
-)
 import typer
 import uvicorn
+from passlib.context import CryptContext
+from sqlalchemy.ext.asyncio import (
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from webtronics.api.appbuilder import build_app
-from webtronics.api.routers import users_router
-from webtronics.api.stubs import auth_stub, get_current_user_stub
-from webtronics.api.helpers.repo import UserRepo
 from webtronics.api.helpers.auth import AuthHelper
 from webtronics.api.helpers.jwt import JWTHelper
 from webtronics.api.helpers.misc import get_current_user_factory
+from webtronics.api.helpers.repo import UserRepo
+from webtronics.api.routers import users_router
+from webtronics.api.stubs import auth_stub, get_current_user_stub
 
 
 def main():
@@ -44,9 +43,7 @@ def _main(
 
     engine = create_async_engine(database)
 
-    sessionmaker = async_sessionmaker(
-        engine, expire_on_commit=False
-    )
+    sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
     user_repo = UserRepo(sessionmaker=sessionmaker)
     jwt_helper = JWTHelper(secret_key=secret_key)
     auth_helper = AuthHelper(

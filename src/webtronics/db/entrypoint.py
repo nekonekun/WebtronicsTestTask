@@ -1,10 +1,9 @@
 """Alembic helper script"""
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 
 from alembic.config import CommandLine, Config
-
 
 PROJECT_PATH = Path(__file__).parent.parent.resolve()
 

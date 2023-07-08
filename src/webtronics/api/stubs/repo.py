@@ -3,6 +3,7 @@
 
 class UserRepoStub:
     """User repository stub class"""
+
     async def read_one(self, email: str, *args, **kwargs):
         """Read one user"""
         raise NotImplementedError

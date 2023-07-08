@@ -1,10 +1,11 @@
 """Repository related module"""
-from sqlalchemy import select, insert
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
-from webtronics.db.models import User as DbUser
+from sqlalchemy import insert, select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from webtronics.api.exceptions import RepoError
 from webtronics.api.schemas.users import UserDTO
 from webtronics.api.stubs import UserRepoStub
-from webtronics.api.exceptions import RepoError
+from webtronics.db.models import User as DbUser
 
 
 class UserRepo(UserRepoStub):
@@ -16,10 +17,7 @@ class UserRepo(UserRepoStub):
     async def read_one(
         self, email: str, *args, session: AsyncSession | None = None, **kwargs
     ) -> UserDTO:
-        if not session:
-            current_session = self.sessionmaker()
-        else:
-            current_session = session
+        current_session = session if session else self.sessionmaker()
 
         stmt = select(DbUser).where(DbUser.email == email)
         response = await current_session.execute(stmt)
@@ -46,10 +44,7 @@ class UserRepo(UserRepoStub):
         session: AsyncSession | None = None,
         **kwargs,
     ) -> UserDTO:
-        if not session:
-            current_session = self.sessionmaker()
-        else:
-            current_session = session
+        current_session = session if session else self.sessionmaker()
 
         possible_existing_user = await self.read_one(email, current_session)
         if possible_existing_user:

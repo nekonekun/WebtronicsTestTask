@@ -1,9 +1,9 @@
 """Miscellaneous dependencies"""
-from fastapi import Request, HTTPException, status
+from fastapi import HTTPException, Request, status
 
-from webtronics.api.stubs import JWTStub, UserRepoStub
-from webtronics.api.exceptions import JWTHelperException, RepoError
+from webtronics.api.exceptions import JWTHelperError, RepoError
 from webtronics.api.schemas.users import User
+from webtronics.api.stubs import JWTStub, UserRepoStub
 
 
 def get_current_user_factory(user_repo: UserRepoStub, jwt_helper: JWTStub):
@@ -16,14 +16,21 @@ def get_current_user_factory(user_repo: UserRepoStub, jwt_helper: JWTStub):
             if access_cookie:
                 token = access_cookie
             else:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED
+                ) from None
         try:
             email = jwt_helper.extract_sub(token)
-        except JWTHelperException:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        except JWTHelperError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED
+            ) from None
         try:
             user = await user_repo.read_one(email)
         except RepoError:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED
+            ) from None
         return User.parse_obj(user)
+
     return get_current_user

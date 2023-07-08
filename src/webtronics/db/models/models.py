@@ -1,4 +1,4 @@
-"""Declarative base module"""
+"""Declarative base module."""
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 

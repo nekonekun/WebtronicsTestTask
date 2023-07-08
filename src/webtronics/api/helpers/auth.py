@@ -2,9 +2,9 @@
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from webtronics.api.stubs import UserRepoStub, AuthStub, JWTStub
-from webtronics.api.exceptions import RepoError, AuthError
+from webtronics.api.exceptions import AuthError, RepoError
 from webtronics.api.schemas.users import UserSignInResponse
+from webtronics.api.stubs import AuthStub, JWTStub, UserRepoStub
 
 
 class AuthHelper(AuthStub):

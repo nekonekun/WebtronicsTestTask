@@ -1,10 +1,10 @@
 """JWT-related module"""
-from datetime import timedelta, datetime
-from jose import jwt, JWTError
+from datetime import datetime, timedelta
 
+from jose import JWTError, jwt
+
+from webtronics.api.exceptions import JWTHelperError
 from webtronics.api.stubs import JWTStub
-from webtronics.api.exceptions import JWTHelperException
-
 
 DEFAULT_TOKEN_LIFE_TIME = timedelta(days=7)
 
@@ -22,18 +22,15 @@ class JWTHelper(JWTStub):
         self.algorithm = algorithm
         self.token_lifetime = token_lifetime or DEFAULT_TOKEN_LIFE_TIME
 
-    def create_token(self, data: str | dict, token_lifetime: timedelta = None):
+    def create_token(self, data: str | dict, token_lifetime: timedelta | None = None):
         """Create JWT token from data. Data considered as 'sub' if is string."""
         if not data:
-            raise JWTHelperException('No data was provided')
+            raise JWTHelperError('No data was provided')
         if not token_lifetime:
             token_lifetime = self.token_lifetime
         if token_lifetime < timedelta():
-            raise JWTHelperException('Expires delta must be above zero')
-        if isinstance(data, str):
-            to_encode = {'sub': data}
-        else:
-            to_encode = data
+            raise JWTHelperError('Expires delta must be above zero')
+        to_encode = {'sub': data} if isinstance(data, str) else data
         expire = datetime.utcnow() + token_lifetime
         to_encode.update({'exp': expire})
         try:
@@ -41,7 +38,7 @@ class JWTHelper(JWTStub):
                 to_encode, self.secret_key, algorithm=self.algorithm
             )
         except JWTError as exc:
-            raise JWTHelperException(
+            raise JWTHelperError(
                 f'Failed to create JWT. ' f'Reason: {exc}'
             ) from exc
         return encoded_jwt
@@ -53,10 +50,9 @@ class JWTHelper(JWTStub):
                 encrypted_payload, self.secret_key, algorithms=[self.algorithm]
             )
         except JWTError as exc:
-            raise JWTHelperException(exc) from exc
+            raise JWTHelperError(exc) from exc
 
     def extract_sub(self, encrypted_payload: str):
         """Get username from token"""
         payload = self._decrypt_payload(encrypted_payload)
-        username = payload.get('sub')
-        return username
+        return payload.get('sub')
