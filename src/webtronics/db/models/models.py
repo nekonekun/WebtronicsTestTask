@@ -14,7 +14,7 @@ class User(Base):  # pylint: disable=too-few-public-methods
 
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(unique=True)
-    username: Mapped[str] = mapped_column(unique=True)
+    username: Mapped[str] = mapped_column()
     password: Mapped[str] = mapped_column()
     reactions: Mapped[list['Reaction']] = relationship(back_populates='user')
 

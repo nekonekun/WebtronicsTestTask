@@ -63,6 +63,7 @@ class AuthHelper(AuthStub):
             raise AuthError('Incorrect password')
         token = self.jwt_helper.create_token(user.email)
         return UserSignInResponse(
+            id=user.id,
             email=user.email,
             username=user.username,
             hashed_password=user.hashed_password,

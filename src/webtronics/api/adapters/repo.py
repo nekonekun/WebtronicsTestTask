@@ -1,5 +1,5 @@
 """Repository related module"""
-from sqlalchemy import delete, select, update, func
+from sqlalchemy import delete, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import selectinload
@@ -32,7 +32,7 @@ class UserRepo(UserRepoStub):
             await current_session.close()
 
         if not user:
-            return None
+            raise RepoError('User not found')
 
         return UserDTO(
             id=user.id,
@@ -51,9 +51,13 @@ class UserRepo(UserRepoStub):
         **kwargs,
     ) -> UserDTO:
         current_session = session if session else self.sessionmaker()
+        try:
+            await self.read_one(email, current_session)
+            found = True
+        except RepoError:
+            found = False
 
-        possible_existing_user = await self.read_one(email, current_session)
-        if possible_existing_user:
+        if found:
             if not session:
                 await current_session.close()
             raise RepoError(f'User with email {email} already exists')
@@ -98,9 +102,6 @@ class PostRepo(PostRepoStub):
         response = await current_session.execute(stmt)
 
         post: DbPost = response.scalars().first()
-        stmt = insert(DbReaction)
-        stmt = stmt.values(user_id=author_id, post_id=post.id, like=True)
-        await current_session.execute(stmt)
         user: DbUser = post.author
 
         if not session:

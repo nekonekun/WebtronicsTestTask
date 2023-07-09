@@ -52,6 +52,8 @@ class PosterHelper(PosterStub):
         posts: list[PostDTO] = await self.repo.read_many(
             author_id=author_id, limit=limit, offset=offset
         )
+        if not posts:
+            return []
         answer = []
         for post in posts:
             author = User(
