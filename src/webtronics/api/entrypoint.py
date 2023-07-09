@@ -28,7 +28,7 @@ def _main(
     host: Annotated[str, typer.Option()] = '0.0.0.0',
     port: Annotated[int, typer.Option()] = 8000,
     database: Annotated[
-        str, typer.Option()
+        str, typer.Option(envvar='WT_DATABASE_URL')
     ] = 'postgresql+asyncpg://user:pass@127.0.0.1/db',
     secret_key: Annotated[str, typer.Option()] = '$UPER_$ECRET_KEY#',
 ):
