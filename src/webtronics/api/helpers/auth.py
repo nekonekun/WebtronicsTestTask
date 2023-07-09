@@ -3,7 +3,7 @@ from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from webtronics.api.exceptions import AuthError, RepoError
-from webtronics.api.schemas.users import UserSignInResponse
+from webtronics.api.schemas.users import User, UserSignInResponse
 from webtronics.api.stubs import AuthStub, JWTStub, UserRepoStub
 
 
@@ -45,7 +45,8 @@ class AuthHelper(AuthStub):
             )
         except RepoError as exc:
             raise AuthError(str(exc)) from exc
-        return user
+
+        return User(id=user.id, email=user.email, username=user.username)
 
     async def sign_in(
         self,

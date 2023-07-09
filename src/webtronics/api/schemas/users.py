@@ -1,6 +1,6 @@
 """User-related schemas"""
 # pylint: disable=no-name-in-module,missing-class-docstring,too-few-public-methods
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class BaseUser(BaseModel):
@@ -8,11 +8,13 @@ class BaseUser(BaseModel):
 
 
 class UserDTO(BaseUser):
+    id: int
     username: str
-    hashed_password: str = Field(..., hidden_from_schema=True)
+    hashed_password: str
 
 
 class User(BaseUser):
+    id: int
     username: str
 
 

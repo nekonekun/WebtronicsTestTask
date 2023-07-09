@@ -1,5 +1,6 @@
 """Miscellaneous dependencies"""
-from fastapi import HTTPException, Request, status
+from typing import Annotated
+from fastapi import HTTPException, Request, status, Header, Cookie
 
 from webtronics.api.exceptions import JWTHelperError, RepoError
 from webtronics.api.schemas.users import User
@@ -7,14 +8,20 @@ from webtronics.api.stubs import JWTStub, UserRepoStub
 
 
 def get_current_user_factory(user_repo: UserRepoStub, jwt_helper: JWTStub):
-    async def get_current_user(req: Request):
-        authentication_header = req.headers.get('Authentication')
-        if authentication_header:
-            token = authentication_header.replace('Bearer ', '')
+    """Generate get_current_user function for authorization"""
+
+    async def get_current_user(
+        auth_header: Annotated[
+            str | None, Header(alias='Authentication')
+        ] = None,
+        auth_cookie: Annotated[str | None, Cookie(alias='access')] = None,
+    ):
+
+        if auth_header:
+            token = auth_header.replace('Bearer ', '')
         else:
-            access_cookie = req.cookies.get('access')
-            if access_cookie:
-                token = access_cookie
+            if auth_cookie:
+                token = auth_cookie
             else:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED
