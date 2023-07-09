@@ -3,18 +3,18 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from webtronics.api.schemas.posts import (
-    Post,
-    PostCreateRequest,
-    PostUpdateRequest,
-    PostReactions
-)
-from webtronics.api.schemas.users import User
-from webtronics.api.stubs import PosterStub, get_current_user_stub, poster_stub
 from webtronics.api.exceptions import (
     PosterNotFoundError,
     PosterPermissionError,
 )
+from webtronics.api.schemas.posts import (
+    Post,
+    PostCreateRequest,
+    PostReactions,
+    PostUpdateRequest,
+)
+from webtronics.api.schemas.users import User
+from webtronics.api.stubs import PosterStub, get_current_user_stub, poster_stub
 
 posts_router = APIRouter(
     prefix='/posts',
@@ -46,7 +46,7 @@ async def list_posts(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='No posts with given conditions found',
-        )
+        ) from None
     return posts
 
 
@@ -62,7 +62,7 @@ async def read_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(exc),
-        )
+        ) from exc
     return post
 
 
@@ -78,7 +78,7 @@ async def update_post(
     except PosterNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        )
+        ) from exc
     return post
 
 
@@ -94,7 +94,7 @@ async def delete_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(exc),
-        )
+        ) from exc
     return post
 
 
@@ -109,11 +109,11 @@ async def like_post(
     except PosterPermissionError as exc:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)
-        )
+        ) from exc
     except PosterNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        )
+        ) from exc
     return response
 
 
@@ -128,9 +128,9 @@ async def dislike_post(
     except PosterPermissionError as exc:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)
-        )
+        ) from exc
     except PosterNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        )
+        ) from exc
     return response

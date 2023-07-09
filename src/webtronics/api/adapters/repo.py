@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 from webtronics.api.exceptions import RepoError
 from webtronics.api.schemas.posts import PostDTO
 from webtronics.api.schemas.users import UserDTO
-from webtronics.api.stubs import PostRepoStub, UserRepoStub, ReactionRepoStub
+from webtronics.api.stubs import PostRepoStub, ReactionRepoStub, UserRepoStub
 from webtronics.db.models import Post as DbPost
 from webtronics.db.models import Reaction as DbReaction
 from webtronics.db.models import User as DbUser

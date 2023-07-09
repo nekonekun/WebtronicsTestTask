@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from webtronics.api.adapters.repo import PostRepo, UserRepo, ReactionRepo
+from webtronics.api.adapters.repo import PostRepo, ReactionRepo, UserRepo
 from webtronics.api.appbuilder import build_app
 from webtronics.api.helpers.auth import AuthHelper
 from webtronics.api.helpers.jwt import JWTHelper

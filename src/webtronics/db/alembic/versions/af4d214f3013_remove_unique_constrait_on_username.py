@@ -3,11 +3,8 @@
 Revision ID: af4d214f3013
 Revises: a3c4050fb8c0
 Create Date: 2023-07-09 21:42:15.684023
-
 """
 from alembic import op
-import sqlalchemy as sa
-
 
 # revision identifiers, used by Alembic.
 revision = 'af4d214f3013'

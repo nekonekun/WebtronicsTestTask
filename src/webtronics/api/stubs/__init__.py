@@ -8,8 +8,8 @@ from webtronics.api.stubs.jwt import JWTStub
 from webtronics.api.stubs.poster import PosterStub
 from webtronics.api.stubs.repo import (
     PostRepoStub,
-    UserRepoStub,
     ReactionRepoStub,
+    UserRepoStub,
 )
 
 __all__ = [
