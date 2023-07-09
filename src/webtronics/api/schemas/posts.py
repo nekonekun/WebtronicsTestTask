@@ -26,3 +26,9 @@ class Post(BaseModel):
 class PostUpdateRequest(BaseModel):
     title: str | None = None
     text: str | None = None
+
+
+class PostReactions(BaseModel):
+    post_id: int
+    likes: int
+    dislikes: int

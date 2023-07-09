@@ -16,6 +16,7 @@ class User(Base):  # pylint: disable=too-few-public-methods
     email: Mapped[str] = mapped_column(unique=True)
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str] = mapped_column()
+    reactions: Mapped[list['Reaction']] = relationship(back_populates='user')
 
 
 class Post(Base):
@@ -30,3 +31,20 @@ class Post(Base):
         ForeignKey('users.id'), nullable=True
     )
     author: Mapped['User'] = relationship()
+    reactions: Mapped[list['Reaction']] = relationship(back_populates='post')
+
+
+class Reaction(Base):
+    """Like/dislike table"""
+
+    __tablename__ = 'reactions'
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey('users.id'), primary_key=True
+    )
+    post_id: Mapped[int] = mapped_column(
+        ForeignKey('posts.id'), primary_key=True
+    )
+    like: Mapped[bool]
+    user: Mapped['User'] = relationship(back_populates='reactions')
+    post: Mapped['Post'] = relationship(back_populates='reactions')

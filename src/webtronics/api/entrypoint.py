@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from webtronics.api.adapters.repo import PostRepo, UserRepo
+from webtronics.api.adapters.repo import PostRepo, UserRepo, ReactionRepo
 from webtronics.api.appbuilder import build_app
 from webtronics.api.helpers.auth import AuthHelper
 from webtronics.api.helpers.jwt import JWTHelper
@@ -47,6 +47,7 @@ def _main(
     sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
     user_repo = UserRepo(sessionmaker=sessionmaker)
     post_repo = PostRepo(sessionmaker=sessionmaker)
+    reaction_repo = ReactionRepo(sessionmaker=sessionmaker)
     jwt_helper = JWTHelper(secret_key=secret_key)
     auth_helper = AuthHelper(
         user_repo=user_repo,
@@ -54,7 +55,7 @@ def _main(
         jwt_helper=jwt_helper,
     )
     get_current_user = get_current_user_factory(user_repo, jwt_helper)
-    poster_helper = PosterHelper(post_repo)
+    poster_helper = PosterHelper(post_repo, reaction_repo)
 
     app.dependency_overrides[auth_stub] = auth_helper
     app.dependency_overrides[get_current_user_stub] = get_current_user

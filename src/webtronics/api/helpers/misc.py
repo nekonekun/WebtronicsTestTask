@@ -1,6 +1,7 @@
 """Miscellaneous dependencies"""
 from typing import Annotated
-from fastapi import HTTPException, Request, status, Header, Cookie
+
+from fastapi import Cookie, Header, HTTPException, status
 
 from webtronics.api.exceptions import JWTHelperError, RepoError
 from webtronics.api.schemas.users import User

@@ -26,6 +26,10 @@ class PosterStub:
         """Delete post"""
         raise NotImplementedError
 
+    async def react(self, post_id: int, user_id: int, like: bool = True):
+        """React to post"""
+        raise NotImplementedError
+
     def __call__(self):
         """Make class Depends-able"""
         return self

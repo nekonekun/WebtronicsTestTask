@@ -1,13 +1,15 @@
 """Repository related module"""
-from sqlalchemy import insert, select, update, delete
+from sqlalchemy import delete, select, update, func
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import selectinload
 
 from webtronics.api.exceptions import RepoError
 from webtronics.api.schemas.posts import PostDTO
 from webtronics.api.schemas.users import UserDTO
-from webtronics.api.stubs import PostRepoStub, UserRepoStub
+from webtronics.api.stubs import PostRepoStub, UserRepoStub, ReactionRepoStub
 from webtronics.db.models import Post as DbPost
+from webtronics.db.models import Reaction as DbReaction
 from webtronics.db.models import User as DbUser
 
 
@@ -96,6 +98,9 @@ class PostRepo(PostRepoStub):
         response = await current_session.execute(stmt)
 
         post: DbPost = response.scalars().first()
+        stmt = insert(DbReaction)
+        stmt = stmt.values(user_id=author_id, post_id=post.id, like=True)
+        await current_session.execute(stmt)
         user: DbUser = post.author
 
         if not session:
@@ -274,3 +279,39 @@ class PostRepo(PostRepoStub):
             author_id=post.author_id,
             author=author,
         )
+
+
+class ReactionRepo(ReactionRepoStub):
+    def __init__(self, sessionmaker: async_sessionmaker):
+        self.sessionmaker = sessionmaker
+
+    async def create(
+        self,
+        user_id: int,
+        post_id: int,
+        like: bool = True,
+        *args,
+        session: AsyncSession | None = None,
+        **kwargs,
+    ):
+        current_session = session if session else self.sessionmaker()
+
+        stmt = insert(DbReaction)
+        stmt = stmt.values(user_id=user_id, post_id=post_id, like=like)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=['user_id', 'post_id'], set_={'like': like}
+        )
+        await current_session.execute(stmt)
+        stmt = select(DbReaction.like)
+        stmt = stmt.where(DbReaction.post_id == post_id)
+        response = await current_session.execute(stmt)
+
+        if not session:
+            await current_session.commit()
+            await current_session.close()
+
+        result = response.scalars().all()
+        likes = result.count(True)
+        dislikes = result.count(False)
+
+        return {'likes': likes, 'dislikes': dislikes}

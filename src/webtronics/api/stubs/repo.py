@@ -39,13 +39,30 @@ class PostRepoStub:
         raise NotImplementedError
 
     async def patch(
-        self, post_id: int, title: str | None, text: str | None, *args, **kwargs
+        self,
+        post_id: int,
+        title: str | None,
+        text: str | None,
+        *args,
+        **kwargs
     ):
         """Edit post title or content"""
         raise NotImplementedError
 
     async def delete(self, post_id: int, *args, **kwargs):
         """Delete post"""
+        raise NotImplementedError
+
+    def __call__(self):
+        """Make class Depends-able"""
+        return self
+
+
+class ReactionRepoStub:
+    async def create(
+        self, user_id: int, post_id: int, like: bool = True, *args, **kwargs
+    ):
+        """React to post"""
         raise NotImplementedError
 
     def __call__(self):
