@@ -1,5 +1,6 @@
 """Declarative base module."""
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):  # pylint: disable=too-few-public-methods
@@ -15,3 +16,17 @@ class User(Base):  # pylint: disable=too-few-public-methods
     email: Mapped[str] = mapped_column(unique=True)
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str] = mapped_column()
+
+
+class Post(Base):
+    """Post schema"""
+
+    __tablename__ = 'posts'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column()
+    text: Mapped[str] = mapped_column()
+    author_id: Mapped[int] = mapped_column(
+        ForeignKey('users.id'), nullable=True
+    )
+    author: Mapped['User'] = relationship()
