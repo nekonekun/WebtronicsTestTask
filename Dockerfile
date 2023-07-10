@@ -26,6 +26,6 @@ RUN poetry check
 
 COPY . /app
 
-RUN poetry install --no-interaction --no-cache
+RUN poetry install --no-interaction --no-cache --without dev
 
 EXPOSE 8000
