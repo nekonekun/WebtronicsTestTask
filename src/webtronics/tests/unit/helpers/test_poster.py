@@ -2,12 +2,12 @@ import pytest
 
 from webtronics.api.exceptions import PosterError
 from webtronics.api.helpers.poster import PosterHelper
-from webtronics.db.models import Post, User
-from sqlalchemy import delete
 
 
 @pytest.mark.asyncio
-async def test_poster(sessionmaker, user_repo, post_repo, reaction_repo, cleanup):
+async def test_poster(
+    sessionmaker, user_repo, post_repo, reaction_repo, cleanup
+):
     # async with sessionmaker() as session:
     #     stmt = delete(Post)
     #     await session.execute(stmt)

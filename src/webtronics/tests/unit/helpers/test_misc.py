@@ -1,8 +1,7 @@
 import pytest
 from fastapi import HTTPException
+
 from webtronics.api.helpers.misc import get_current_user_factory
-from webtronics.db.models import Post, User
-from sqlalchemy import delete
 
 
 @pytest.mark.asyncio

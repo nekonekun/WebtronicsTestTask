@@ -1,14 +1,14 @@
 import asyncio
 import os
-import pytest
-import pytest_asyncio
-
 from datetime import timedelta
+
+import pytest
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from webtronics.api.adapters.repo import UserRepo, PostRepo, ReactionRepo
+
+from webtronics.api.adapters.repo import PostRepo, ReactionRepo, UserRepo
 from webtronics.api.helpers.jwt import JWTHelper
 from webtronics.db.models import Post, User
-from sqlalchemy import delete
 
 
 @pytest.fixture(scope='session')
@@ -16,7 +16,7 @@ def database_url():
     return os.getenv('WT_DATABASE_URL')
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def event_loop():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)

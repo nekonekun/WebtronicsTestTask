@@ -1,9 +1,5 @@
-import os
 import pytest
 from passlib.context import CryptContext
-from webtronics.db.models import Post, User
-from sqlalchemy import delete
-
 
 from webtronics.api.helpers.auth import AuthError, AuthHelper
 

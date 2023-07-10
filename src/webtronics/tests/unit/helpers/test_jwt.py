@@ -3,8 +3,7 @@ from datetime import timedelta
 
 import pytest
 
-from webtronics.api.helpers.jwt import JWTHelperError
-from webtronics.api.helpers.jwt import JWTHelper
+from webtronics.api.helpers.jwt import JWTHelper, JWTHelperError
 
 
 @pytest.fixture
