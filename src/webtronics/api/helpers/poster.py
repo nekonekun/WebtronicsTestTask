@@ -1,6 +1,7 @@
 from webtronics.api.exceptions import (
     PosterNotFoundError,
     PosterPermissionError,
+    RepoError,
 )
 from webtronics.api.schemas.posts import Post, PostDTO, PostReactions
 from webtronics.api.schemas.users import User
@@ -31,9 +32,10 @@ class PosterHelper(PosterStub):
         )
 
     async def read_one(self, post_id: int):
-        post: PostDTO = await self.repo.read_one(post_id=post_id)
-        if not post:
-            raise PosterNotFoundError(f'Post with id {post_id} does not exist')
+        try:
+            post: PostDTO = await self.repo.read_one(post_id=post_id)
+        except RepoError as exc:
+            raise PosterNotFoundError(str(exc)) from exc
         author = User(
             id=post.author.id,
             email=post.author.email,
@@ -69,9 +71,10 @@ class PosterHelper(PosterStub):
         return answer
 
     async def delete(self, post_id: int):
-        post: PostDTO = await self.repo.delete(post_id=post_id)
-        if not post:
-            raise PosterNotFoundError(f'Post with id {post_id} does not exist')
+        try:
+            post: PostDTO = await self.repo.delete(post_id=post_id)
+        except RepoError as exc:
+            raise PosterNotFoundError(str(exc)) from exc
         author = User(
             id=post.author.id,
             email=post.author.email,
@@ -84,11 +87,12 @@ class PosterHelper(PosterStub):
     async def patch(
         self, post_id: int, title: str | None = None, text: str | None = None
     ):
-        post: PostDTO = await self.repo.patch(
-            post_id=post_id, title=title, text=text
-        )
-        if not post:
-            raise PosterNotFoundError(f'Post with id {post_id} does not exist')
+        try:
+            post: PostDTO = await self.repo.patch(
+                post_id=post_id, title=title, text=text
+            )
+        except RepoError as exc:
+            raise PosterNotFoundError(str(exc)) from exc
         author = User(
             id=post.author.id,
             email=post.author.email,
@@ -99,9 +103,10 @@ class PosterHelper(PosterStub):
         )
 
     async def react(self, post_id: int, user_id: int, like: bool = True):
-        post = await self.read_one(post_id)
-        if not post:
-            raise PosterNotFoundError('Post not found')
+        try:
+            post = await self.read_one(post_id)
+        except RepoError as exc:
+            raise PosterNotFoundError(str(exc)) from exc
         if post.author.id == user_id:
             raise PosterPermissionError('You cannot react to own post')
         response = await self.reaction_repo.create(

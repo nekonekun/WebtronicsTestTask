@@ -139,7 +139,7 @@ class PostRepo(PostRepoStub):
             await current_session.close()
         post: DbPost = response.scalars().first()
         if not post:
-            return None
+            raise RepoError(f'Post with ID {post_id} does not exist')
 
         user: DbUser = post.author
 
@@ -206,8 +206,8 @@ class PostRepo(PostRepoStub):
     async def patch(
         self,
         post_id: int,
-        title: str | None,
-        text: str | None,
+        title: str | None = None,
+        text: str | None = None,
         *args,
         session: AsyncSession | None = None,
         **kwargs,
@@ -218,7 +218,7 @@ class PostRepo(PostRepoStub):
         if title:
             stmt = stmt.values(title=title)
         if text:
-            stmt = stmt.values(title=text)
+            stmt = stmt.values(text=text)
         stmt = stmt.returning(DbPost)
         stmt = stmt.options(selectinload(DbPost.author))
         response = await current_session.execute(stmt)
@@ -227,7 +227,7 @@ class PostRepo(PostRepoStub):
             await current_session.close()
         post: DbPost = response.scalars().first()
         if not post:
-            return None
+            raise RepoError(f'Post with ID {post_id} does not exist')
         user: DbUser = post.author
 
         author = UserDTO(
@@ -264,7 +264,7 @@ class PostRepo(PostRepoStub):
 
         post: DbPost = response.scalars().first()
         if not post:
-            return None
+            raise RepoError(f'Post with ID {post_id} does not exist')
         user: DbUser = post.author
 
         author = UserDTO(
@@ -303,7 +303,8 @@ class ReactionRepo(ReactionRepoStub):
             index_elements=['user_id', 'post_id'], set_={'like': like}
         )
         await current_session.execute(stmt)
-        stmt = select(DbReaction.like)
+        stmt = select(DbReaction)
+        stmt = stmt.options(selectinload(DbReaction.user))
         stmt = stmt.where(DbReaction.post_id == post_id)
         response = await current_session.execute(stmt)
 
@@ -311,8 +312,10 @@ class ReactionRepo(ReactionRepoStub):
             await current_session.commit()
             await current_session.close()
 
-        result = response.scalars().all()
-        likes = result.count(True)
-        dislikes = result.count(False)
+        result: list[DbReaction] = response.scalars().all()
+        likes = [reaction.user.id for reaction in result if reaction.like]
+        dislikes = [
+            reaction.user.id for reaction in result if not reaction.like
+        ]
 
         return {'likes': likes, 'dislikes': dislikes}

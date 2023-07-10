@@ -56,9 +56,10 @@ class AuthHelper(AuthStub):
         session: AsyncSession | None = None,
         **kwargs,
     ):
-        user = await self.user_repo.read_one(email=email, session=session)
-        if not user:
-            raise AuthError(f'User {email} does not exists')
+        try:
+            user = await self.user_repo.read_one(email=email, session=session)
+        except RepoError as exc:
+            raise AuthError(str(exc)) from exc
         if not self._verify_password(password, user.hashed_password):
             raise AuthError('Incorrect password')
         token = self.jwt_helper.create_token(user.email)

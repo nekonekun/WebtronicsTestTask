@@ -34,7 +34,7 @@ auth_stub = AuthStub()
 poster_stub = PosterStub()
 
 
-def get_current_user_stub(
+async def get_current_user_stub(
     auth_header: Annotated[str | None, Header(alias='Authentication')] = None,
     auth_cookie: Annotated[str | None, Cookie(alias='access')] = None,
 ):

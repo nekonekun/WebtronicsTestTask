@@ -41,8 +41,8 @@ class PostRepoStub:
     async def patch(
         self,
         post_id: int,
-        title: str | None,
-        text: str | None,
+        title: str | None = None,
+        text: str | None = None,
         *args,
         **kwargs
     ):

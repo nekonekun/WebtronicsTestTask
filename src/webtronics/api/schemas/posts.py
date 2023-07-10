@@ -30,5 +30,5 @@ class PostUpdateRequest(BaseModel):
 
 class PostReactions(BaseModel):
     post_id: int
-    likes: int
-    dislikes: int
+    likes: list[int]
+    dislikes: list[int]

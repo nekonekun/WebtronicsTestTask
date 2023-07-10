@@ -28,7 +28,7 @@ class Post(Base):
     title: Mapped[str] = mapped_column()
     text: Mapped[str] = mapped_column()
     author_id: Mapped[int] = mapped_column(
-        ForeignKey('users.id'), nullable=True
+        ForeignKey('users.id', ondelete='CASCADE'), nullable=False
     )
     author: Mapped['User'] = relationship()
     reactions: Mapped[list['Reaction']] = relationship(back_populates='post')
@@ -40,10 +40,10 @@ class Reaction(Base):
     __tablename__ = 'reactions'
 
     user_id: Mapped[int] = mapped_column(
-        ForeignKey('users.id'), primary_key=True
+        ForeignKey('users.id', ondelete='CASCADE'), primary_key=True
     )
     post_id: Mapped[int] = mapped_column(
-        ForeignKey('posts.id'), primary_key=True
+        ForeignKey('posts.id', ondelete='CASCADE'), primary_key=True
     )
     like: Mapped[bool]
     user: Mapped['User'] = relationship(back_populates='reactions')
