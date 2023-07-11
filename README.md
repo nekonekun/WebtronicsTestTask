@@ -6,6 +6,10 @@ Task description can be viewed [here](docs/TaskDescription.md).
 ## Deployment
 
 ### Docker
+ - Copy example file
+```shell
+cp .env.example .env
+```
  - Edit .env file, as in example:
 ```text
 WT_DATABASE_URL=postgresql+asyncpg://prod:prod@database:5432/prod
