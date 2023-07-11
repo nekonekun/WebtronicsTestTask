@@ -12,7 +12,7 @@ from fastapi import (
     status,
 )
 
-from webtronics.api.exceptions import AuthError
+from webtronics.api.exceptions import AuthError, AuthEmailAlreadyExistError, AuthInvalidEmail
 from webtronics.api.schemas.users import (
     User,
     UserSignInRequest,
@@ -38,9 +38,13 @@ async def signup(
             username=body.username or body.email,
             password=body.password,
         )
-    except AuthError as exc:
+    except AuthEmailAlreadyExistError as exc:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f'Email "{body.email}" already registered'
+        ) from exc
+    except AuthInvalidEmail as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f'Email "{body.email}" seems to be invalid'
         ) from exc
     return response
 

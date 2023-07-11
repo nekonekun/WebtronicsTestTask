@@ -11,6 +11,7 @@ from webtronics.api.stubs.repo import (
     ReactionRepoStub,
     UserRepoStub,
 )
+from webtronics.api.stubs.verifier import EmailVerifierStub
 
 __all__ = [
     'UserRepoStub',
@@ -19,18 +20,13 @@ __all__ = [
     'AuthStub',
     'JWTStub',
     'PosterStub',
-    'user_repo_stub',
-    'post_repo_stub',
-    'reaction_repo_stub',
+    'EmailVerifierStub',
     'auth_stub',
     'poster_stub',
     'get_current_user_stub',
 ]
 
 
-user_repo_stub = UserRepoStub()
-post_repo_stub = PostRepoStub()
-reaction_repo_stub = ReactionRepoStub()
 auth_stub = AuthStub()
 poster_stub = PosterStub()
 
