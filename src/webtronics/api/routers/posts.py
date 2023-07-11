@@ -149,11 +149,6 @@ async def reactions(
     poster: Annotated[PosterStub, Depends(poster_stub)],
     post_id: int,
 ):
-    """View post reactions."""
-    try:
-        response = await poster.read_reactions(post_id)
-    except PosterNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        ) from exc
+    """View post reactions. Without post existing check."""
+    response = await poster.read_reactions(post_id)
     return response
