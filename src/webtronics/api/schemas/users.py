@@ -17,7 +17,9 @@ class User(BaseModel):
 
 
 class UserSignUpRequest(BaseModel):
-    email: str = Field(examples=['email@local'], description='Email (must be unique)')
+    email: str = Field(
+        examples=['email@local'], description='Email (must be unique)'
+    )
     username: str = Field(examples=['username'], description='Username')
     password: str = Field(examples=['password'], description='Password')
 
@@ -28,4 +30,6 @@ class UserSignInRequest(BaseModel):
 
 
 class UserSignInResponse(User):
-    jwt_token: str = Field('jwt_authentication_token', description='JWT authentication token')
+    jwt_token: str = Field(
+        'jwt_authentication_token', description='JWT authentication token'
+    )

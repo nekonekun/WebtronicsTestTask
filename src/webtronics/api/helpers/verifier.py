@@ -1,5 +1,5 @@
 from webtronics.api.adapters.emailhunter import EmailHunterAPI
-from webtronics.api.exceptions import VerifierError, EmailHunterError
+from webtronics.api.exceptions import EmailHunterError, VerifierError
 from webtronics.api.interfaces import EmailVerifierStub
 
 

@@ -2,10 +2,20 @@
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from webtronics.api.exceptions import AuthError, RepoError, AuthEmailAlreadyExistError, AuthInvalidEmail, VerifierError
+from webtronics.api.exceptions import (
+    AuthEmailAlreadyExistError,
+    AuthError,
+    AuthInvalidEmailError,
+    RepoError,
+    VerifierError,
+)
+from webtronics.api.interfaces import (
+    EmailVerifierStub,
+    JWTInterface,
+    UserRepoInterface,
+)
 from webtronics.api.schemas.users import User, UserSignInResponse
 from webtronics.api.stubs import AuthStub
-from webtronics.api.interfaces import JWTInterface, UserRepoInterface, EmailVerifierStub
 
 
 class AuthHelper(AuthStub):
@@ -16,7 +26,7 @@ class AuthHelper(AuthStub):
         user_repo: UserRepoInterface,
         pwd_context: CryptContext,
         jwt_helper: JWTInterface,
-        email_verifier: EmailVerifierStub | None = None
+        email_verifier: EmailVerifierStub | None = None,
     ):
         self.pwd_context = pwd_context
         self.user_repo = user_repo
@@ -48,7 +58,7 @@ class AuthHelper(AuthStub):
     ):
         hashed_password = self._get_password_hash(password)
         if not await self._verify_email(email):
-            raise AuthInvalidEmail(f'Email "{email}" is invalid')
+            raise AuthInvalidEmailError(f'Email "{email}" is invalid')
         try:
             user = await self.user_repo.create(
                 email=email,

@@ -1,17 +1,21 @@
 """Repository related module"""
+from redis import asyncio as aioredis
 from sqlalchemy import delete, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import selectinload
 
 from webtronics.api.exceptions import RepoError
+from webtronics.api.interfaces import (
+    PostRepoInterface,
+    ReactionRepoInterface,
+    UserRepoInterface,
+)
 from webtronics.api.schemas.posts import PostDTO
 from webtronics.api.schemas.users import UserDTO
-from webtronics.api.interfaces import PostRepoInterface, ReactionRepoInterface, UserRepoInterface
 from webtronics.db.models import Post as DbPost
 from webtronics.db.models import Reaction as DbReaction
 from webtronics.db.models import User as DbUser
-from redis import asyncio as aioredis
 
 
 class UserRepo(UserRepoInterface):
@@ -321,7 +325,13 @@ class ReactionRepo(ReactionRepoInterface):
 
         return {'likes': likes, 'dislikes': dislikes}
 
-    async def read(self, post_id: int, *args, session: AsyncSession | None = None, **kwargs):
+    async def read(
+        self,
+        post_id: int,
+        *args,
+        session: AsyncSession | None = None,
+        **kwargs,
+    ):
         current_session = session if session else self.sessionmaker()
 
         stmt = select(DbReaction)
@@ -342,14 +352,24 @@ class ReactionRepo(ReactionRepoInterface):
 
 
 class ReactionRepoWithCache(ReactionRepo):
-    def __init__(self, sessionmaker: async_sessionmaker, redis_client: aioredis.Redis):
+    def __init__(
+        self, sessionmaker: async_sessionmaker, redis_client: aioredis.Redis
+    ):
         self.redis_client = redis_client
         super().__init__(sessionmaker)
 
     async def create(
-        self, user_id: int, post_id: int, like: bool = True, *args, session: AsyncSession | None = None, **kwargs
+        self,
+        user_id: int,
+        post_id: int,
+        like: bool = True,
+        *args,
+        session: AsyncSession | None = None,
+        **kwargs,
     ):
-        response = await super().create(user_id, post_id, like, session=session)
+        response = await super().create(
+            user_id, post_id, like, session=session
+        )
         like_key = f'like_{post_id}'
         dislike_key = f'dislike_{post_id}'
 

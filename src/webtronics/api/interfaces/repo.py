@@ -52,7 +52,6 @@ class PostRepoInterface(ABC):
 
 
 class ReactionRepoInterface(ABC):
-
     @abstractmethod
     async def create(
         self, user_id: int, post_id: int, like: bool = True, *args, **kwargs
