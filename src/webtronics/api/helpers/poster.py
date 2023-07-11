@@ -113,3 +113,7 @@ class PosterHelper(PosterStub):
             user_id=user_id, post_id=post_id, like=like
         )
         return PostReactions(post_id=post.id, **response)
+
+    async def read_reactions(self, post_id: int):
+        response = await self.reaction_repo.read(post_id=post_id)
+        return PostReactions(post_id=post_id, **response)

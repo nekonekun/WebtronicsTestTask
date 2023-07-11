@@ -23,6 +23,7 @@ __all__ = [
     'post_repo_stub',
     'reaction_repo_stub',
     'auth_stub',
+    'poster_stub',
     'get_current_user_stub',
 ]
 

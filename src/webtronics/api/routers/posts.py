@@ -28,6 +28,7 @@ async def create_post(
     poster: Annotated[PosterStub, Depends(poster_stub)],
     body: PostCreateRequest,
 ):
+    """Create new post"""
     return await poster.create(
         title=body.title, text=body.text, author_id=current_user.id
     )
@@ -41,6 +42,7 @@ async def list_posts(
     offset: Annotated[int, Query()] = 0,
     limit: Annotated[int, Query()] = 10,
 ):
+    """View some posts. Post could be filtered by author_id."""
     posts = await poster.read_many(author_id, limit, offset)
     if not posts:
         raise HTTPException(
@@ -50,12 +52,13 @@ async def list_posts(
     return posts
 
 
-@posts_router.get('/{post_id}/')
+@posts_router.get('/{post_id}/', response_model=Post)
 async def read_post(
     current_user: Annotated[User, Depends(get_current_user_stub)],
     poster: Annotated[PosterStub, Depends(poster_stub)],
     post_id: int,
 ):
+    """Read exact post."""
     try:
         post = await poster.read_one(post_id)
     except PosterNotFoundError as exc:
@@ -73,6 +76,7 @@ async def update_post(
     post_id: int,
     body: PostUpdateRequest,
 ):
+    """Edit post title or text"""
     try:
         post = await poster.patch(post_id, body.title, body.text)
     except PosterNotFoundError as exc:
@@ -88,6 +92,7 @@ async def delete_post(
     poster: Annotated[PosterStub, Depends(poster_stub)],
     post_id: int,
 ):
+    """Delete post"""
     try:
         post = await poster.delete(post_id)
     except PosterNotFoundError as exc:
@@ -104,6 +109,7 @@ async def like_post(
     poster: Annotated[PosterStub, Depends(poster_stub)],
     post_id: int,
 ):
+    """Like exact post. You cannot like or dislike your own post."""
     try:
         response = await poster.react(post_id, current_user.id, True)
     except PosterPermissionError as exc:
@@ -123,6 +129,7 @@ async def dislike_post(
     poster: Annotated[PosterStub, Depends(poster_stub)],
     post_id: int,
 ):
+    """Dislike exact post. You cannot like or dislike your own post."""
     try:
         response = await poster.react(post_id, current_user.id, False)
     except PosterPermissionError as exc:
@@ -133,4 +140,15 @@ async def dislike_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
         ) from exc
+    return response
+
+
+@posts_router.get('/{post_id}/reactions/', response_model=PostReactions)
+async def reactions(
+    current_user: Annotated[User, Depends(get_current_user_stub)],
+    poster: Annotated[PosterStub, Depends(poster_stub)],
+    post_id: int,
+):
+    """View post reactions. Without post existing check."""
+    response = await poster.read_reactions(post_id)
     return response

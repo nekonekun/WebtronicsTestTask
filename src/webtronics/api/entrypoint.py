@@ -10,8 +10,8 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-
-from webtronics.api.adapters.repo import PostRepo, ReactionRepo, UserRepo
+from redis import asyncio as aioredis
+from webtronics.api.adapters.repo import PostRepo, ReactionRepo, UserRepo, ReactionRepoWithCache
 from webtronics.api.appbuilder import LifeSpanBuilder, build_app
 from webtronics.api.helpers.auth import AuthHelper
 from webtronics.api.helpers.jwt import JWTHelper
@@ -22,9 +22,10 @@ from webtronics.api.stubs import auth_stub, get_current_user_stub, poster_stub
 
 
 class ProductionLifeSpanBuilder(LifeSpanBuilder):
-    def __init__(self, database_url: str, secret_key: str):
+    def __init__(self, database_url: str, secret_key: str, redis_url: str = None):
         self.database_url = database_url
         self.secret_key = secret_key
+        self.redis_url = redis_url
 
     @asynccontextmanager
     async def lifespan(self, app: FastAPI):
@@ -33,7 +34,14 @@ class ProductionLifeSpanBuilder(LifeSpanBuilder):
         sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
         user_repo = UserRepo(sessionmaker=sessionmaker)
         post_repo = PostRepo(sessionmaker=sessionmaker)
-        reaction_repo = ReactionRepo(sessionmaker=sessionmaker)
+        if self.redis_url:
+            redis_client = aioredis.Redis.from_url(self.redis_url)
+            reaction_repo = ReactionRepoWithCache(sessionmaker=sessionmaker,
+                                                  redis_client=redis_client)
+            await reaction_repo.init_cache()
+        else:
+            reaction_repo = ReactionRepo(sessionmaker=sessionmaker)
+
         jwt_helper = JWTHelper(secret_key=self.secret_key)
         auth_helper = AuthHelper(
             user_repo=user_repo,
@@ -60,13 +68,16 @@ def _main(
     database: Annotated[
         str, typer.Option(envvar='WT_DATABASE_URL')
     ] = 'postgresql+asyncpg://user:pass@127.0.0.1/db',
+    redis: Annotated[
+        str, typer.Option(envvar='WT_REDIS_URL', help='Optional. Example: redis://127.0.0.1:6379/0')
+    ] = None,
     secret_key: Annotated[str, typer.Option()] = '$UPER_$ECRET_KEY#',
 ):
     """Create app and override stub dependencies"""
     app = build_app(
         users_router,
         posts_router,
-        lifespanbuilder=ProductionLifeSpanBuilder(database, secret_key),
+        lifespanbuilder=ProductionLifeSpanBuilder(database, secret_key, redis),
     )
 
     uvicorn_params = {
