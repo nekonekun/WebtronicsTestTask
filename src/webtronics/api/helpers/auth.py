@@ -2,9 +2,9 @@
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from webtronics.api.exceptions import AuthError, RepoError
+from webtronics.api.exceptions import AuthError, RepoError, AuthEmailAlreadyExistError, AuthInvalidEmail, VerifierError
 from webtronics.api.schemas.users import User, UserSignInResponse
-from webtronics.api.stubs import AuthStub, JWTStub, UserRepoStub
+from webtronics.api.stubs import AuthStub, JWTStub, UserRepoStub, EmailVerifierStub
 
 
 class AuthHelper(AuthStub):
@@ -15,16 +15,26 @@ class AuthHelper(AuthStub):
         user_repo: UserRepoStub,
         pwd_context: CryptContext,
         jwt_helper: JWTStub,
+        email_verifier: EmailVerifierStub | None = None
     ):
         self.pwd_context = pwd_context
         self.user_repo = user_repo
         self.jwt_helper = jwt_helper
+        self.email_verifier = email_verifier
 
     def _verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def _get_password_hash(self, password):
         return self.pwd_context.hash(password)
+
+    async def _verify_email(self, email: str):
+        if not self.email_verifier:
+            return True
+        try:
+            return await self.email_verifier.verify(email)
+        except VerifierError:
+            return True
 
     async def sign_up(
         self,
@@ -36,6 +46,8 @@ class AuthHelper(AuthStub):
         **kwargs,
     ):
         hashed_password = self._get_password_hash(password)
+        if not await self._verify_email(email):
+            raise AuthInvalidEmail(f'Email "{email}" is invalid')
         try:
             user = await self.user_repo.create(
                 email=email,
@@ -44,7 +56,7 @@ class AuthHelper(AuthStub):
                 session=session,
             )
         except RepoError as exc:
-            raise AuthError(str(exc)) from exc
+            raise AuthEmailAlreadyExistError(str(exc)) from exc
 
         return User(id=user.id, email=user.email, username=user.username)
 

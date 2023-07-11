@@ -5,6 +5,14 @@ class AuthError(Exception):
     """Generic auth exception"""
 
 
+class AuthInvalidEmail(AuthError):
+    """Invalid registration email"""
+
+
+class AuthEmailAlreadyExistError(AuthError):
+    """Email already exists"""
+
+
 class JWTHelperError(Exception):
     """Generic JWT helper exception"""
 
@@ -23,3 +31,11 @@ class PosterNotFoundError(PosterError):
 
 class PosterPermissionError(PosterError):
     """Permission-issues error"""
+
+
+class EmailHunterError(Exception):
+    """Generic emailhunter.co exception"""
+
+
+class VerifierError(Exception):
+    """Generic e-mail verifier exception"""

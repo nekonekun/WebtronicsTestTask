@@ -12,20 +12,23 @@ from sqlalchemy.ext.asyncio import (
 )
 from redis import asyncio as aioredis
 from webtronics.api.adapters.repo import PostRepo, ReactionRepo, UserRepo, ReactionRepoWithCache
+from webtronics.api.adapters.emailhunter import EmailHunterAPI
 from webtronics.api.appbuilder import LifeSpanBuilder, build_app
 from webtronics.api.helpers.auth import AuthHelper
 from webtronics.api.helpers.jwt import JWTHelper
 from webtronics.api.helpers.misc import get_current_user_factory
 from webtronics.api.helpers.poster import PosterHelper
+from webtronics.api.helpers.verifier import EmailVerifier
 from webtronics.api.routers import posts_router, users_router
 from webtronics.api.stubs import auth_stub, get_current_user_stub, poster_stub
 
 
 class ProductionLifeSpanBuilder(LifeSpanBuilder):
-    def __init__(self, database_url: str, secret_key: str, redis_url: str = None):
+    def __init__(self, database_url: str, secret_key: str, redis_url: str = None, email_hunter_api_key: str = None):
         self.database_url = database_url
         self.secret_key = secret_key
         self.redis_url = redis_url
+        self.email_hunter_api_key = email_hunter_api_key
 
     @asynccontextmanager
     async def lifespan(self, app: FastAPI):
@@ -43,11 +46,21 @@ class ProductionLifeSpanBuilder(LifeSpanBuilder):
             reaction_repo = ReactionRepo(sessionmaker=sessionmaker)
 
         jwt_helper = JWTHelper(secret_key=self.secret_key)
-        auth_helper = AuthHelper(
-            user_repo=user_repo,
-            pwd_context=CryptContext(schemes=['bcrypt'], deprecated='auto'),
-            jwt_helper=jwt_helper,
-        )
+        if self.email_hunter_api_key:
+            email_hunter_api = EmailHunterAPI(api_key=self.email_hunter_api_key)
+            email_verifier = EmailVerifier(api=email_hunter_api)
+            auth_helper = AuthHelper(
+                user_repo=user_repo,
+                pwd_context=CryptContext(schemes=['bcrypt'], deprecated='auto'),
+                jwt_helper=jwt_helper,
+                email_verifier=email_verifier
+            )
+        else:
+            auth_helper = AuthHelper(
+                user_repo=user_repo,
+                pwd_context=CryptContext(schemes=['bcrypt'], deprecated='auto'),
+                jwt_helper=jwt_helper,
+            )
         get_current_user = get_current_user_factory(user_repo, jwt_helper)
         poster_helper = PosterHelper(post_repo, reaction_repo)
 
@@ -71,13 +84,14 @@ def _main(
     redis: Annotated[
         str, typer.Option(envvar='WT_REDIS_URL', help='Optional. Example: redis://127.0.0.1:6379/0')
     ] = None,
+    email_hunter_api_key: Annotated[str, typer.Option(envvar='WT_HUNTER_KEY', help='Optional.')] = None,
     secret_key: Annotated[str, typer.Option()] = '$UPER_$ECRET_KEY#',
 ):
     """Create app and override stub dependencies"""
     app = build_app(
         users_router,
         posts_router,
-        lifespanbuilder=ProductionLifeSpanBuilder(database, secret_key, redis),
+        lifespanbuilder=ProductionLifeSpanBuilder(database, secret_key, redis, email_hunter_api_key),
     )
 
     uvicorn_params = {
