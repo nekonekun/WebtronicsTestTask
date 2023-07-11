@@ -3,13 +3,16 @@ from webtronics.api.exceptions import (
     PosterPermissionError,
     RepoError,
 )
+from webtronics.api.interfaces import PostRepoInterface, ReactionRepoInterface
 from webtronics.api.schemas.posts import Post, PostDTO, PostReactions
 from webtronics.api.schemas.users import User
-from webtronics.api.stubs import PosterStub, PostRepoStub, ReactionRepoStub
+from webtronics.api.stubs import PosterStub
 
 
 class PosterHelper(PosterStub):
-    def __init__(self, repo: PostRepoStub, reaction_repo: ReactionRepoStub):
+    def __init__(
+        self, repo: PostRepoInterface, reaction_repo: ReactionRepoInterface
+    ):
         self.repo = repo
         self.reaction_repo = reaction_repo
 

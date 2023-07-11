@@ -4,11 +4,13 @@ from typing import Annotated
 from fastapi import Cookie, Header, HTTPException, status
 
 from webtronics.api.exceptions import JWTHelperError, RepoError
+from webtronics.api.interfaces import JWTInterface, UserRepoInterface
 from webtronics.api.schemas.users import User
-from webtronics.api.stubs import JWTStub, UserRepoStub
 
 
-def get_current_user_factory(user_repo: UserRepoStub, jwt_helper: JWTStub):
+def get_current_user_factory(
+    user_repo: UserRepoInterface, jwt_helper: JWTInterface
+):
     """Generate get_current_user function for authorization"""
 
     async def get_current_user(

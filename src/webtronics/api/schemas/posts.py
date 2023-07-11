@@ -24,11 +24,19 @@ class Post(BaseModel):
 
 
 class PostUpdateRequest(BaseModel):
-    title: str | None = Field(examples=['new title'], description='New post title')
-    text: str | None = Field(examples=['new text'], description='New post text')
+    title: str | None = Field(
+        examples=['new title'], description='New post title'
+    )
+    text: str | None = Field(
+        examples=['new text'], description='New post text'
+    )
 
 
 class PostReactions(BaseModel):
     post_id: int = Field(examples=[0], description='Post id')
-    likes: list[int] = Field(examples=[[1, 2]], description='Users who liked this post')
-    dislikes: list[int] = Field(examples=[[3, 4]], description='Users who disliked this post')
+    likes: list[int] = Field(
+        examples=[[1, 2]], description='Users who liked this post'
+    )
+    dislikes: list[int] = Field(
+        examples=[[3, 4]], description='Users who disliked this post'
+    )

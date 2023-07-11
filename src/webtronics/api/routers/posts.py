@@ -150,5 +150,4 @@ async def reactions(
     post_id: int,
 ):
     """View post reactions. Without post existing check."""
-    response = await poster.read_reactions(post_id)
-    return response
+    return await poster.read_reactions(post_id)

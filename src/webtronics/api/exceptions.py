@@ -5,7 +5,7 @@ class AuthError(Exception):
     """Generic auth exception"""
 
 
-class AuthInvalidEmail(AuthError):
+class AuthInvalidEmailError(AuthError):
     """Invalid registration email"""
 
 

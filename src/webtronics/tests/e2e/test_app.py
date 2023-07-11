@@ -35,7 +35,7 @@ def test_auth(client, cleanup):
         '/users/signup',
         json={'email': 'a@local', 'username': 'a', 'password': '123456'},
     )
-    assert response.status_code == 401
+    assert response.status_code == 422
 
     response = client.post(
         '/users/signin', json={'email': 'a@local', 'password': '12345'}
