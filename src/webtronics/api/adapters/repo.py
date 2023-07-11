@@ -339,3 +339,51 @@ class ReactionRepo(ReactionRepoStub):
         ]
 
         return {'likes': likes, 'dislikes': dislikes}
+
+
+class ReactionRepoWithCache(ReactionRepo):
+    def __init__(self, sessionmaker: async_sessionmaker, redis_client: aioredis.Redis):
+        self.redis_client = redis_client
+        super().__init__(sessionmaker)
+
+    async def create(
+        self, user_id: int, post_id: int, like: bool = True, *args, session: AsyncSession | None = None, **kwargs
+    ):
+        await super().create(user_id, post_id, like, session=session)
+        like_key = f'like_{post_id}'
+        dislike_key = f'dislike_{post_id}'
+
+        if like:
+            await self.redis_client.srem(dislike_key, user_id)
+            await self.redis_client.sadd(like_key, user_id)
+        else:
+            await self.redis_client.srem(like_key, user_id)
+            await self.redis_client.sadd(dislike_key, user_id)
+
+    async def read(self, post_id: int, *args, **kwargs):
+        like_key = f'like_{post_id}'
+        dislike_key = f'dislike_{post_id}'
+        likes = await self.redis_client.smembers(like_key)
+        dislikes = await self.redis_client.smembers(dislike_key)
+        return {'likes': likes, 'dislikes': dislikes}
+
+    async def init_cache(self):
+        await self.redis_client.delete('*')
+
+        current_session = self.sessionmaker()
+        stmt = select(DbReaction)
+        stmt = stmt.options(selectinload(DbReaction.user))
+        response = await current_session.execute(stmt)
+        await current_session.close()
+
+        result: list[DbReaction] = response.scalars().all()
+
+        for element in result:
+            post_id = element.post_id
+            user_id = element.user_id
+            like_key = f'like_{post_id}'
+            dislike_key = f'dislike_{post_id}'
+            if element.like:
+                await self.redis_client.sadd(like_key, user_id)
+            else:
+                await self.redis_client.sadd(dislike_key, user_id)
