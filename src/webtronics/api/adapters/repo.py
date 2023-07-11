@@ -7,14 +7,14 @@ from sqlalchemy.orm import selectinload
 from webtronics.api.exceptions import RepoError
 from webtronics.api.schemas.posts import PostDTO
 from webtronics.api.schemas.users import UserDTO
-from webtronics.api.stubs import PostRepoStub, ReactionRepoStub, UserRepoStub
+from webtronics.api.interfaces import PostRepoInterface, ReactionRepoInterface, UserRepoInterface
 from webtronics.db.models import Post as DbPost
 from webtronics.db.models import Reaction as DbReaction
 from webtronics.db.models import User as DbUser
 from redis import asyncio as aioredis
 
 
-class UserRepo(UserRepoStub):
+class UserRepo(UserRepoInterface):
     """User repository"""
 
     def __init__(self, sessionmaker: async_sessionmaker):
@@ -82,7 +82,7 @@ class UserRepo(UserRepoStub):
         )
 
 
-class PostRepo(PostRepoStub):
+class PostRepo(PostRepoInterface):
     def __init__(self, sessionmaker: async_sessionmaker):
         self.sessionmaker = sessionmaker
 
@@ -283,7 +283,7 @@ class PostRepo(PostRepoStub):
         )
 
 
-class ReactionRepo(ReactionRepoStub):
+class ReactionRepo(ReactionRepoInterface):
     def __init__(self, sessionmaker: async_sessionmaker):
         self.sessionmaker = sessionmaker
 

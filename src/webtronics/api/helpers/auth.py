@@ -4,7 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from webtronics.api.exceptions import AuthError, RepoError, AuthEmailAlreadyExistError, AuthInvalidEmail, VerifierError
 from webtronics.api.schemas.users import User, UserSignInResponse
-from webtronics.api.stubs import AuthStub, JWTStub, UserRepoStub, EmailVerifierStub
+from webtronics.api.stubs import AuthStub
+from webtronics.api.interfaces import JWTInterface, UserRepoInterface, EmailVerifierStub
 
 
 class AuthHelper(AuthStub):
@@ -12,9 +13,9 @@ class AuthHelper(AuthStub):
 
     def __init__(
         self,
-        user_repo: UserRepoStub,
+        user_repo: UserRepoInterface,
         pwd_context: CryptContext,
-        jwt_helper: JWTStub,
+        jwt_helper: JWTInterface,
         email_verifier: EmailVerifierStub | None = None
     ):
         self.pwd_context = pwd_context

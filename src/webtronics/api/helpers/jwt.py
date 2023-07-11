@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 from jose import JWSError, JWTError, jwt
 
 from webtronics.api.exceptions import JWTHelperError
-from webtronics.api.stubs import JWTStub
+from webtronics.api.interfaces import JWTInterface
 
 DEFAULT_TOKEN_LIFE_TIME = timedelta(days=7)
 
 
-class JWTHelper(JWTStub):
+class JWTHelper(JWTInterface):
     """JWT helper class"""
 
     def __init__(
