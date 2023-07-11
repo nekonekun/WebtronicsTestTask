@@ -30,6 +30,10 @@ class PosterStub:
         """React to post"""
         raise NotImplementedError
 
+    async def read_reactions(self, post_id: int):
+        """Get reactions to post"""
+        raise NotImplementedError
+
     def __call__(self):
         """Make class Depends-able"""
         return self

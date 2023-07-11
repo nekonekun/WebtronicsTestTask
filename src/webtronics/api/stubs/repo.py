@@ -65,6 +65,10 @@ class ReactionRepoStub:
         """React to post"""
         raise NotImplementedError
 
+    async def read(self, post_id: int, *args, **kwargs):
+        """Get post reactions"""
+        raise NotImplementedError
+
     def __call__(self):
         """Make class Depends-able"""
         return self

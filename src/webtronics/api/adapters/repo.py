@@ -11,6 +11,7 @@ from webtronics.api.stubs import PostRepoStub, ReactionRepoStub, UserRepoStub
 from webtronics.db.models import Post as DbPost
 from webtronics.db.models import Reaction as DbReaction
 from webtronics.db.models import User as DbUser
+from redis import asyncio as aioredis
 
 
 class UserRepo(UserRepoStub):
@@ -310,6 +311,25 @@ class ReactionRepo(ReactionRepoStub):
 
         if not session:
             await current_session.commit()
+            await current_session.close()
+
+        result: list[DbReaction] = response.scalars().all()
+        likes = [reaction.user.id for reaction in result if reaction.like]
+        dislikes = [
+            reaction.user.id for reaction in result if not reaction.like
+        ]
+
+        return {'likes': likes, 'dislikes': dislikes}
+
+    async def read(self, post_id: int, *args, session: AsyncSession | None = None, **kwargs):
+        current_session = session if session else self.sessionmaker()
+
+        stmt = select(DbReaction)
+        stmt = stmt.options(selectinload(DbReaction.user))
+        stmt = stmt.where(DbReaction.post_id == post_id)
+        response = await current_session.execute(stmt)
+
+        if not session:
             await current_session.close()
 
         result: list[DbReaction] = response.scalars().all()

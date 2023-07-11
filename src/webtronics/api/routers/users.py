@@ -69,8 +69,6 @@ async def signin(
 @users_router.get('/me', response_model=User)
 async def get_me(
     current_user: Annotated[User, Depends(get_current_user_stub)],
-    auth_header: Annotated[str | None, Header(alias='Authentication')] = None,
-    auth_cookie: Annotated[str | None, Cookie(alias='access')] = None,
 ):
-    """Get currently logged-in user"""
+    """Get currently logged-in user information"""
     return current_user
