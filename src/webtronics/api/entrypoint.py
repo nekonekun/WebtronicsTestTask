@@ -22,7 +22,7 @@ from webtronics.api.stubs import auth_stub, get_current_user_stub, poster_stub
 
 
 class ProductionLifeSpanBuilder(LifeSpanBuilder):
-    def __init__(self, database_url: str, secret_key: str, redis_url: str):
+    def __init__(self, database_url: str, secret_key: str, redis_url: str = None):
         self.database_url = database_url
         self.secret_key = secret_key
         self.redis_url = redis_url
@@ -40,7 +40,7 @@ class ProductionLifeSpanBuilder(LifeSpanBuilder):
                                                   redis_client=redis_client)
             await reaction_repo.init_cache()
         else:
-            reaction_repo = ReactionRepoWithCache(sessionmaker=sessionmaker)
+            reaction_repo = ReactionRepo(sessionmaker=sessionmaker)
 
         jwt_helper = JWTHelper(secret_key=self.secret_key)
         auth_helper = AuthHelper(
