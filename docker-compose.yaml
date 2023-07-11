@@ -14,6 +14,13 @@ services:
       retries: 5
     networks:
       - app-network
+  cache:
+    image: redis
+    hostname: cache
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
   app:
     build: .
     command: bash -c "poetry run wt-db upgrade head && poetry run wt-api"
