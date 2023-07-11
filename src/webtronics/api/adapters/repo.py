@@ -349,7 +349,7 @@ class ReactionRepoWithCache(ReactionRepo):
     async def create(
         self, user_id: int, post_id: int, like: bool = True, *args, session: AsyncSession | None = None, **kwargs
     ):
-        await super().create(user_id, post_id, like, session=session)
+        response = await super().create(user_id, post_id, like, session=session)
         like_key = f'like_{post_id}'
         dislike_key = f'dislike_{post_id}'
 
@@ -359,6 +359,7 @@ class ReactionRepoWithCache(ReactionRepo):
         else:
             await self.redis_client.srem(like_key, user_id)
             await self.redis_client.sadd(dislike_key, user_id)
+        return response
 
     async def read(self, post_id: int, *args, **kwargs):
         like_key = f'like_{post_id}'
