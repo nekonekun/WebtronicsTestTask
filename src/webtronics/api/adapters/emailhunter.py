@@ -17,7 +17,7 @@ class EmailHunterAPI:
         )
         if response.status_code == 401:
             content = response.json()
-            errors = [error['detail'] for error in content]
+            errors = [error['details'] for error in content.get('errors', [])]
             raise EmailHunterError('; '.join(errors))
         if response.status_code != 200:
             raise EmailHunterError('Error processing request')
